@@ -4,10 +4,10 @@ import React from "react";
 function NavLink() {
   const navItems = [
     { id: 1, label: "Home", path: "/" },
-    { id: 2, label: "Records", path: "/" },
+    { id: 2, label: "Records", path: "/page/record" },
     { id: 3, label: "Analysis", path: "/" },
     { id: 4, label: "Budgets", path: "/" },
-    { id: 5, label: "Accounts", path: "/" },
+    { id: 5, label: "Accounts", path: "/page/account" },
     { id: 6, label: "Categories", path: "/" },
   ];
 
