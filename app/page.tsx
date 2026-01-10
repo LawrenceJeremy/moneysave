@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState, FormEvent } from "react";
 import { CirclePlus } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 type Wallet = {
   id: number;
@@ -19,53 +20,110 @@ type Wallet = {
   due_date: string;
 };
 
-export default function page() {
-  const [wallets, setWallets] = useState<Wallet[]>([]); // start empty
-  const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+type MyWallet = {
+  id: number;
+  name: string;
+  amount: number;
+  due_date: string;
+};
 
-  // Handle Add Wallet
-  const handleAdd = (e: FormEvent<HTMLFormElement>) => {
+export default function page() {
+  const [formWallet, setFormWallet] = useState<MyWallet[]>([]); // create
+  const [selectwallet, setSelectWallet] = useState<MyWallet | null>(null); // read
+  const [toggle, setToggle] = useState(false); // toggle
+  const [walletToggle, setWalletToggle] = useState(false); // toggle
+
+  // Create
+  const newWallet = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!formWallet) return;
+
     const formData = new FormData(e.currentTarget);
-    const newWallet: Wallet = {
-      id: Date.now(), // unique id
-      label: formData.get("label") as string,
-      money: Number(formData.get("money")),
+    const myWallet: MyWallet = {
+      id: Date.now(),
+      name: formData.get("name") as string,
+      amount: Number(formData.get("amount")),
       due_date: formData.get("due_date") as string,
     };
 
-    setWallets((prev) => [...prev, newWallet]);
-    setIsAddDialogOpen(false);
+    setFormWallet((prev) => [...prev, myWallet]);
+    setWalletToggle(false);
   };
 
-  // Handle Edit Wallet
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Update
+  const updateWallet = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedWallet) return;
+    if (!selectwallet) return;
 
     const formData = new FormData(e.currentTarget);
-    const updatedWallet: Wallet = {
-      ...selectedWallet,
-      label: formData.get("label") as string,
-      money: Number(formData.get("money")),
+    const updateForm: MyWallet = {
+      ...selectwallet,
+      name: formData.get("name") as string,
+      amount: Number(formData.get("amount")),
       due_date: formData.get("due_date") as string,
     };
 
-    setWallets((prev) =>
-      prev.map((w) => (w.id === updatedWallet.id ? updatedWallet : w))
+    setFormWallet((prev) =>
+      prev.map((w) => (w.id === updateForm.id ? updateForm : w))
     );
-
-    setSelectedWallet(null);
+    setSelectWallet(null);
   };
 
   return (
     <div>
       {/* Record Track */}
       <div className="mb-8 space-y-4">
-        <h2 className="text-xl">Record Track</h2>
-        <Skeleton className="w-6xl h-96" />
+        <h2 className="text-xl">Track Record</h2>
+        <div className="w-6xl h-96 space-y-8">
+          {formWallet.map((wallet) => (
+            <div key={wallet.id} className="w-64 h-32 border rounded-2xl p-4">
+              <h3>{wallet.name}</h3>
+              <span>{wallet.amount}</span>
+              <p>{wallet.due_date}</p>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <Dialog open={toggle} onOpenChange={setToggle}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Wallet</DialogTitle>
+            <DialogDescription>
+              Fill out the form to add a wallet
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="flex flex-col gap-4" onSubmit={newWallet}>
+            <Label>Name</Label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Untitled"
+              className="border rounded p-2"
+              required
+            />
+            <Label>Amount</Label>
+            <input
+              type="number"
+              name="amount"
+              placeholder="Untitled"
+              className="border rounded p-2"
+              required
+            />
+            <Label>Due Date</Label>
+            <input
+              type="date"
+              name="due_date"
+              className="border rounded p-2"
+              required
+            />
+            <DialogFooter>
+              <Button type="submit">Add</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Budgets */}
       <div className="mb-8 space-y-4">
@@ -74,28 +132,28 @@ export default function page() {
           <Button
             size="sm"
             className="rounded-full"
-            onClick={() => setIsAddDialogOpen(true)}
+            onClick={() => setWalletToggle(true)}
           >
             <CirclePlus />
           </Button>
         </div>
 
         <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
-          {wallets.length === 0 ? (
+          {formWallet.length === 0 ? (
             <p className="text-gray-500 italic">
               No wallets yet. Click the + button to add your first wallet!
             </p>
           ) : (
-            wallets.map((wallet) => (
+            formWallet.map((wallet) => (
               <div
                 key={wallet.id}
                 className="flex-shrink-0 w-60 h-40 border border-slate-200 rounded-2xl p-4 cursor-pointer"
-                onClick={() => setSelectedWallet(wallet)}
+                onClick={() => setSelectWallet(wallet)}
               >
                 <h3 className="text-xl font-semibold truncate">
-                  {wallet.label}
+                  {wallet.name}
                 </h3>
-                <span className="text-lg font-bold">{wallet.money}</span>
+                <span className="text-lg font-bold">{wallet.amount}</span>
                 <p className="text-sm">
                   Due Date: <br />
                   {wallet.due_date}
@@ -106,7 +164,7 @@ export default function page() {
         </div>
 
         {/* Add Wallet Dialog */}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={walletToggle} onOpenChange={setWalletToggle}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Wallet</DialogTitle>
@@ -115,21 +173,24 @@ export default function page() {
               </DialogDescription>
             </DialogHeader>
 
-            <form className="flex flex-col gap-4" onSubmit={handleAdd}>
+            <form className="flex flex-col gap-4" onSubmit={newWallet}>
+              <Label>Name</Label>
               <input
                 type="text"
-                name="label"
-                placeholder="Label"
+                name="name"
+                placeholder="Untitled"
                 className="border rounded p-2"
                 required
               />
+              <Label>Amount</Label>
               <input
                 type="number"
-                name="money"
-                placeholder="Amount"
+                name="amount"
+                placeholder="Untitled"
                 className="border rounded p-2"
                 required
               />
+              <Label>Due Date</Label>
               <input
                 type="date"
                 name="due_date"
@@ -137,7 +198,7 @@ export default function page() {
                 required
               />
               <DialogFooter>
-                <Button type="submit">Add</Button>
+                <Button type="submit" className="w-full">Save</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -145,42 +206,42 @@ export default function page() {
 
         {/* Edit Wallet Dialog */}
         <Dialog
-          open={!!selectedWallet}
-          onOpenChange={() => setSelectedWallet(null)}
+          open={!!selectwallet}
+          onOpenChange={() => setSelectWallet(null)}
         >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {selectedWallet ? `Edit ${selectedWallet.label}` : "Wallet"}
+                {selectwallet ? `Edit ${selectwallet.name}` : "Wallet"}
               </DialogTitle>
               <DialogDescription>
                 Update the wallet info below
               </DialogDescription>
             </DialogHeader>
 
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-4" onSubmit={updateWallet}>
               <input
                 type="text"
-                name="label"
-                defaultValue={selectedWallet?.label}
+                name="name"
+                defaultValue={selectwallet?.name}
                 placeholder="Label"
                 className="border rounded p-2"
               />
               <input
                 type="number"
-                name="money"
-                defaultValue={selectedWallet?.money}
+                name="amount"
+                defaultValue={selectwallet?.amount}
                 placeholder="Amount"
                 className="border rounded p-2"
               />
               <input
                 type="date"
                 name="due_date"
-                defaultValue={selectedWallet?.due_date}
+                defaultValue={selectwallet?.due_date}
                 className="border rounded p-2"
               />
               <DialogFooter>
-                <Button type="submit">Save</Button>
+                <Button type="submit" className="w-full">Save</Button>
               </DialogFooter>
             </form>
           </DialogContent>
