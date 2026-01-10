@@ -73,15 +73,40 @@ export default function page() {
     <div>
       {/* Record Track */}
       <div className="mb-8 space-y-4">
-        <h2 className="text-xl">Track Record</h2>
-        <div className="w-6xl h-96 space-y-8">
-          {formWallet.map((wallet) => (
-            <div key={wallet.id} className="w-64 h-32 border rounded-2xl p-4">
-              <h3>{wallet.name}</h3>
-              <span>{wallet.amount}</span>
-              <p>{wallet.due_date}</p>
+        <h2 className="text-xl font-semibold">Track Record</h2>
+        <div className="grid grid-cols-3 h-96 gap-8 rounded-2xl ">
+          {/* left side */}
+          <div
+            className="col-span-2 h-full overflow-y-auto
+                flex flex-wrap items-start content-start gap-4 p-4 border shadow-md rounded-lg"
+          >
+            {formWallet.map((wallet) => (
+              <div key={wallet.id} className="shadow-sm border rounded-md p-4">
+                <h3 className="font-semibold text-lg">{wallet.name}</h3>
+                <span className="text-sm font-black">{wallet.amount}</span>
+                <p className="text-xs">{wallet.due_date}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* right side */}
+          <div className="col-span-1 border shadow-md rounded-lg">
+            <h1 className="text-center mt-2 font-semibold">Total</h1>
+            <div className="grid grid-cols-3 text-sm max-w-full overflow-x-auto m-4 gap-4 w-auto h-auto ">
+              <div className="p-4 border rounded-lg">
+                <h3>Records</h3>
+                <span className="font-bold">20</span>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h3>Accounts</h3>
+                <span className="font-bold">5</span>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h3>Categories</h3>
+                <span className="font-bold">3</span>
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
@@ -128,7 +153,7 @@ export default function page() {
       {/* Budgets */}
       <div className="mb-8 space-y-4">
         <div className="flex gap-4 items-center">
-          <h2 className="text-xl">My Wallet</h2>
+          <h2 className="text-xl font-semibold">My Account</h2>
           <Button
             size="sm"
             className="rounded-full"
@@ -198,7 +223,9 @@ export default function page() {
                 required
               />
               <DialogFooter>
-                <Button type="submit" className="w-full">Save</Button>
+                <Button type="submit" className="w-full">
+                  Save
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -241,7 +268,9 @@ export default function page() {
                 className="border rounded p-2"
               />
               <DialogFooter>
-                <Button type="submit" className="w-full">Save</Button>
+                <Button type="submit" className="w-full">
+                  Save
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
