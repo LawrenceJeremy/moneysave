@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 
@@ -13,12 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
   Table,
@@ -28,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FormInput } from "lucide-react";
 
 type FormValues = {
   username: string;
@@ -36,7 +32,7 @@ type FormValues = {
 };
 
 export default function RegisterForm() {
-  const form = useForm<FormValues>({
+  const formSave = useForm<FormValues>({
     defaultValues: {
       username: "",
       email: "",
@@ -44,144 +40,204 @@ export default function RegisterForm() {
     },
   });
 
-  // Submitted data state (single record for simplicity)
-  const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
+  const formUpdate = useForm<FormValues>({
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+  });
 
-  // Editing state → null = creating, object = editing
-  const [editingData, setEditingData] = useState<FormValues | null>(null);
+  // State: multiple records
+  const [records, setRecords] = useState<FormValues[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  // Submit handler (Register or Update)
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    if (editingData) {
-      // Update record
-      setSubmittedData(data);
-      setEditingData(null);
-      form.reset();
-    } else {
-      // Register new record
-      setSubmittedData(data);
-      form.reset();
-    }
+  // Save
+  const onSave: SubmitHandler<FormValues> = (data) => {
+    setRecords([...records, data]);
+    formSave.reset();
+  };
+
+  // Update
+  const onEdit: SubmitHandler<FormValues> = (data) => {
+    if (editingIndex === null) return;
+
+    const updated = [...records];
+    updated[editingIndex] = data;
+    setRecords(updated);
+
+    setEditingIndex(null);
+    formUpdate.reset();
+  };
+
+  const handleEditClick = (index: number) => {
+    setEditingIndex(index);
+    formUpdate.reset(records[index]);
   };
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6 space-y-6">
-      {/* FORM */}
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full max-w-md space-y-6 border p-6 rounded-lg shadow"
-        >
-          <h1 className="text-2xl font-bold text-center">
-            {editingData ? "Update Record" : "Save"}
-          </h1>
+      <div className="flex gap-10 w-full max-w-4xl">
+        {/* FORM 1: SAVE */}
+        <Form {...formSave}>
+          <form
+            onSubmit={formSave.handleSubmit(onSave)}
+            className="flex-1 space-y-4 border p-6 rounded-lg shadow"
+          >
+            <h2 className="text-xl font-bold text-center">Save Form</h2>
 
-          {/* USERNAME */}
-          <FormField
-            control={form.control}
-            name="username"
-            rules={{ required: "Username is required" }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter username" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={formSave.control}
+              name="username"
+              rules={{ required: "Username is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* EMAIL */}
-          <FormField
-            control={form.control}
-            name="email"
-            rules={{
-              required: "Email is required",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Invalid email address",
-              },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={formSave.control}
+              name="email"
+              rules={{
+                required: "Email is required",
+                pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* PASSWORD */}
-          <FormField
-            control={form.control}
-            name="password"
-            rules={{
-              required: "Password is required",
-              minLength: { value: 6, message: "Minimum 6 characters" },
-            }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={formSave.control}
+              name="password"
+              rules={{
+                required: "Password is required",
+                minLength: { value: 6, message: "Min 6 characters" },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Enter password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit" className="w-full">
-            {editingData ? "Update" : "Save"}
-          </Button>
-        </form>
-      </Form>
+            <Button type="submit" className="w-full">
+              Save
+            </Button>
+          </form>
+        </Form>
 
-      {/* DISPLAY SUBMITTED DATA */}
-      {submittedData && (
-        <Card className="w-full max-w-md">
+        {/* FORM 2: UPDATE */}
+        <Form {...formUpdate}>
+          <form
+            onSubmit={formUpdate.handleSubmit(onEdit)}
+            className="flex-1 space-y-4 border p-6 rounded-lg shadow"
+          >
+            <h2 className="text-xl font-bold text-center">Update Form</h2>
+
+            <FormField
+              control={formUpdate.control}
+              name="username"
+              rules={{ required: "Username is required" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={formUpdate.control}
+              name="email"
+              rules={{
+                required: "Email is required",
+                pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={formUpdate.control}
+              name="password"
+              rules={{
+                required: "Password is required",
+                minLength: { value: 6, message: "Min 6 characters" },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Enter password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={editingIndex === null}>
+              Update
+            </Button>
+          </form>
+        </Form>
+      </div>
+
+      {/* TABLE DISPLAY */}
+      {records.length > 0 && (
+        <Card className="w-full max-w-4xl">
           <CardHeader>
-            <CardTitle>Submitted Data</CardTitle>
+            <CardTitle>Records</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Field</TableHead>
-                  <TableHead>Value</TableHead>
+                  <TableHead>Username</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Password</TableHead>
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>{submittedData.username}</TableCell>
-                  <TableCell rowSpan={3}>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setEditingData(submittedData);
-                        form.reset(submittedData);
-                      }}
-                    >
-                      Update
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>{submittedData.email}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Password</TableCell>
-                  <TableCell>{submittedData.password}</TableCell>
-                </TableRow>
+                {records.map((record, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{record.username}</TableCell>
+                    <TableCell>{record.email}</TableCell>
+                    <TableCell>{record.password}</TableCell>
+                    <TableCell>
+                      <Button size="sm" onClick={() => handleEditClick(index)}>
+                        Update
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
