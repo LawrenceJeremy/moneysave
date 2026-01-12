@@ -13,8 +13,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type FormValues = {
   username: string;
@@ -31,12 +44,24 @@ export default function RegisterForm() {
     },
   });
 
-  // State para sa submitted data
+  // Submitted data state (single record for simplicity)
   const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
 
+  // Editing state → null = creating, object = editing
+  const [editingData, setEditingData] = useState<FormValues | null>(null);
+
+  // Submit handler (Register or Update)
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    setSubmittedData(data);
-    form.reset(); // optional: clear form after submit
+    if (editingData) {
+      // Update record
+      setSubmittedData(data);
+      setEditingData(null);
+      form.reset();
+    } else {
+      // Register new record
+      setSubmittedData(data);
+      form.reset();
+    }
   };
 
   return (
@@ -47,7 +72,9 @@ export default function RegisterForm() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full max-w-md space-y-6 border p-6 rounded-lg shadow"
         >
-          <h1 className="text-2xl font-bold text-center">Register</h1>
+          <h1 className="text-2xl font-bold text-center">
+            {editingData ? "Update Record" : "Save"}
+          </h1>
 
           {/* USERNAME */}
           <FormField
@@ -93,16 +120,17 @@ export default function RegisterForm() {
             name="password"
             rules={{
               required: "Password is required",
-              minLength: {
-                value: 6,
-                message: "Minimum 6 characters",
-              },
+              minLength: { value: 6, message: "Minimum 6 characters" },
             }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Enter password" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -110,7 +138,7 @@ export default function RegisterForm() {
           />
 
           <Button type="submit" className="w-full">
-            Register
+            {editingData ? "Update" : "Save"}
           </Button>
         </form>
       </Form>
@@ -127,12 +155,24 @@ export default function RegisterForm() {
                 <TableRow>
                   <TableHead>Field</TableHead>
                   <TableHead>Value</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow>
                   <TableCell>Username</TableCell>
                   <TableCell>{submittedData.username}</TableCell>
+                  <TableCell rowSpan={3}>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setEditingData(submittedData);
+                        form.reset(submittedData);
+                      }}
+                    >
+                      Update
+                    </Button>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Email</TableCell>
