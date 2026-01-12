@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FormInput } from "lucide-react";
 
 type FormValues = {
   username: string;
@@ -68,6 +67,18 @@ export default function RegisterForm() {
 
     setEditingIndex(null);
     formUpdate.reset();
+  };
+
+  const onDelete = (index: number) => {
+    const updated = [...records];
+    updated.splice(index, 1); // remove the record
+    setRecords(updated);
+
+    // if the deleted row is being edited, reset the update form
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      formUpdate.reset();
+    }
   };
 
   const handleEditClick = (index: number) => {
@@ -130,7 +141,11 @@ export default function RegisterForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -195,14 +210,22 @@ export default function RegisterForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={editingIndex === null}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={editingIndex === null}
+            >
               Update
             </Button>
           </form>
@@ -231,9 +254,16 @@ export default function RegisterForm() {
                     <TableCell>{record.username}</TableCell>
                     <TableCell>{record.email}</TableCell>
                     <TableCell>{record.password}</TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-2">
                       <Button size="sm" onClick={() => handleEditClick(index)}>
                         Update
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => onDelete(index)}
+                      >
+                        Delete
                       </Button>
                     </TableCell>
                   </TableRow>
